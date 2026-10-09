@@ -3,7 +3,7 @@ from typing import Dict, List, Union
 import numpy as np
 import onnxruntime as ort
 from transformers import AutoTokenizer
-from src.config import FINAL_MODEL_DIR, ID2LABEL, MAX_LENGTH
+from src.config import FINAL_MODEL_DIR, ID2LABEL, MAX_LENGTH, BASE_MODEL_NAME
 
 
 class FinancialSentimentPredictor:
@@ -15,10 +15,15 @@ class FinancialSentimentPredictor:
         quant_model_path = f"{model_dir}/onnx/model_quantized.onnx"
         print(f"[INFO] Initializing ONNX runtime session: {quant_model_path}...")
 
-        # Fast tokenizer (pure C++ backed)
-        self.tokenizer = AutoTokenizer.from_pretrained(model_dir)
+        # fast tokenizer 
+        try: 
+            self.tokenizer = AutoTokenizer.from_pretrained(model_dir)
 
-        # Execution provider set strictly to CPU with minimal memory arena
+        except Exception:
+            # fallback to backbone tokenizer if local files are missing in CI
+            print(f"[WARN] Local tokenizer not found at {model_dir}. Falling back to {MODEL_NAME}...")
+            self.tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL_NAME)            
+
         opts = ort.SessionOptions()
         opts.enable_cpu_mem_arena = False
         opts.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL

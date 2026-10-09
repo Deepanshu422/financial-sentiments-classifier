@@ -1,6 +1,6 @@
 Here is the polished, high-impact `README.md` formatted to match the exact aesthetic and structure of your previous project, tailored specifically for **Financial Sentiment Transfer Learning**:
 
-```markdown
+
 # 📈 Financial Sentiment Intelligence
 
 [![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)

@@ -20,8 +20,8 @@ class FinancialSentimentPredictor:
             self.tokenizer = AutoTokenizer.from_pretrained(model_dir)
 
         except Exception:
-            # fallback to backbone tokenizer if local files are missing in CI
-            print(f"[WARN] Local tokenizer not found at {model_dir}. Falling back to {MODEL_NAME}...")
+            # fallback for tokenizer if local files are missing in CI
+            print(f"[WARN] Local tokenizer not found at {model_dir}. Falling back to {BASE_MODEL_NAME}...")
             self.tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL_NAME)            
 
         opts = ort.SessionOptions()

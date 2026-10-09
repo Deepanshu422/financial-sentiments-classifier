@@ -1,13 +1,57 @@
 import pytest
+from pathlib import Path
+from unittest.mock import MagicMock
 from fastapi.testclient import TestClient
 from src.api.main import app
 from src.api.service import sentiment_service
 
 
+MODEL_PATH = Path("artifacts/final_model/onnx/model_quantized.onnx")
+
+
 @pytest.fixture(scope="module", autouse=True)
 def init_service():
-    """Ensure the model weights are loaded before running API tests."""
-    sentiment_service.load_model()
+    """Ensure the model weights are loaded locally, or fall back to mock in CI."""
+    if MODEL_PATH.exists():
+        sentiment_service.load_model()
+        yield
+    else:
+        mock_engine = MagicMock()
+        mock_engine.predict_sentence.return_value = {
+            "sentence": "Operating profit grew by 15% year on year.",
+            "sentiment": "positive",
+            "confidence": 0.9842,
+            "probabilities": {"negative": 0.01, "neutral": 0.01, "positive": 0.98},
+        }
+        mock_engine.predict_long_text.return_value = {
+            "overall_sentiment": "positive",
+            "overall_confidence": 0.9521,
+            "document_probabilities": {"negative": 0.02, "neutral": 0.03, "positive": 0.95},
+            "sentence_count": 3,
+            "sentence_breakdown": [
+                {
+                    "sentence": "Operating profit grew by 15% year on year.",
+                    "sentiment": "positive",
+                    "confidence": 0.9842,
+                    "probabilities": {"negative": 0.01, "neutral": 0.01, "positive": 0.98},
+                },
+                {
+                    "sentence": "However, operating expenses increased in Europe.",
+                    "sentiment": "negative",
+                    "confidence": 0.9123,
+                    "probabilities": {"negative": 0.91, "neutral": 0.06, "positive": 0.03},
+                },
+                {
+                    "sentence": "Management remains confident about reaching year-end targets.",
+                    "sentiment": "positive",
+                    "confidence": 0.9600,
+                    "probabilities": {"negative": 0.02, "neutral": 0.02, "positive": 0.96},
+                },
+            ],
+        }
+        sentiment_service._predictor = mock_engine
+        yield
+        sentiment_service._predictor = None
 
 
 @pytest.fixture

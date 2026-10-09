@@ -1,19 +1,57 @@
-# 📈 Financial Sentiment Transfer Learning & ONNX Inference
+Here is the polished, high-impact `README.md` formatted to match the exact aesthetic and structure of your previous project, tailored specifically for **Financial Sentiment Transfer Learning**:
 
-An end-to-end, production-ready NLP system that fine-tunes a `distilbert-base-uncased` transformer on financial commentary (Financial PhraseBank) and deploys it via an **INT8-quantized ONNX engine** for high-throughput, low-latency CPU serving (<200 MB RAM).
+```markdown
+# 📈 Financial Sentiment Intelligence
 
-Features a decoupled **FastAPI** inference backend, an interactive **Streamlit** dashboard, full test coverage, and a containerized microservice setup.
+[![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit)](https://streamlit.io/)
+[![HuggingFace](https://img.shields.io/badge/HuggingFace-Transformers-FFD21E?style=for-the-badge&logo=huggingface)](https://huggingface.co/)
+[![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?style=for-the-badge&logo=docker)](https://www.docker.com/)
+
+An end-to-end NLP transfer learning service designed to classify financial headlines, earnings releases, and market commentary into **Positive**, **Neutral**, or **Negative** sentiment with calibrated confidence scores.
+
+The platform fine-tunes a `distilbert-base-uncased` transformer on the Financial PhraseBank dataset, serving predictions via a decoupled **FastAPI** inference backend and an interactive **Streamlit** dashboard.
 
 ---
 
-## ⚡ Key Highlights
+## ⚡ Key Features
 
-- **Transfer Learning Backbone:** Fine-tuned `distilbert-base-uncased` across Negative, Neutral, and Positive financial sentiment classes.
-- **Ultra-Low Memory Footprint:** Exported and dynamically quantized to INT8 with **ONNX Runtime**, shrinking model size from **~268 MB to ~65 MB** and runtime RAM to **<200 MB** (fits free-tier deployments like Render, Koyeb, and Hugging Face Spaces).
-- **Decoupled Architecture:** 
-  - **FastAPI Backend:** RESTful endpoints for single headlines and multi-sentence earnings releases.
-  - **Streamlit Frontend:** Real-time sentiment metrics, confidence breakdown, and document parsing.
-- **Production MLOps Standards:** Clean separation between training and inference environments, automated `pytest` suite, and containerized Docker orchestration.
+- **Domain-Adapted Transfer Learning:** Fine-tuned `distilbert-base-uncased` on financial domain texts to detect nuance in earnings reports and regulatory filings.
+- **Microservices-Ready REST API:** Production-grade FastAPI endpoints with structured Pydantic schemas, health checks, and sub-second inference latency.
+- **Document-Level Aggregation:** Analyzes long-form financial passages sentence-by-sentence to produce an overall document sentiment score alongside individual breakdowns.
+- **Interactive Web Interface:** Streamlit-powered dashboard featuring visual confidence metrics, class probability bars, and expandable sentence explorers.
+- **Production Containerization:** Fully containerized multi-service deployment with Docker Compose, internal DNS routing, and automated test coverage.
+
+---
+
+## 🏗️ System Architecture
+
+This project decouples the heavyweight training pipeline from production inference, ensuring lean serving containers and reproducible deployments.
+
+```text
+[Financial Text / Market News]
+               │
+               ▼
+┌──────────────────────────────┐
+│     Streamlit Dashboard      │ ── (Web UI Port 8501)
+└──────────────┬───────────────┘
+               │
+               │ HTTP POST /predict (Internal Docker Network)
+               ▼
+┌──────────────────────────────┐
+│     FastAPI Serving API      │ ── (REST Engine Port 8000)
+│   ├── Pydantic Input Guard   │
+│   ├── Hugging Face Pipeline  │
+│   └── Multi-Sentence Parser  │
+└──────────────┬───────────────┘
+               │
+               ▼ (Reads safetensors & config)
+┌──────────────────────────────┐
+│   Trained Model Artifacts    │ ── (distilbert-base-uncased weights)
+│   (artifacts/final_model/)   │
+└──────────────────────────────┘
+
+```
 
 ---
 
@@ -21,74 +59,132 @@ Features a decoupled **FastAPI** inference backend, an interactive **Streamlit**
 
 ```text
 ├── artifacts/
-│   └── final_model/
-│       ├── onnx/
-│       │   └── model_quantized.onnx  # INT8-quantized ONNX model (~65MB)
-│       ├── model.safetensors         # PyTorch fine-tuned weights
-│       ├── config.json
-│       └── tokenizer.json
+│   └── final_model/          # Fine-tuned safetensors, vocab & config (git-ignored)
 ├── docker/
-│   ├── Dockerfile.serve              # Production serving container (FastAPI)
-│   └── Dockerfile.train              # Dedicated training container
+│   ├── Dockerfile.serve      # Production serving container (API + UI)
+│   └── Dockerfile.train      # Dedicated training container
 ├── src/
 │   ├── api/
-│   │   ├── main.py                   # FastAPI initialization & lifespans
-│   │   ├── routes.py                 # REST route definitions
-│   │   ├── schemas.py                # Pydantic request/response models
-│   │   └── service.py                # Model loader & service wrapper
-│   ├── app_ui.py                     # Streamlit frontend dashboard
-│   ├── config.py                     # Global paths & hyperparameter configs
-│   ├── dataset_loader.py             # Financial PhraseBank split & tokenization
-│   ├── export_onnx.py                # PyTorch -> INT8 ONNX conversion pipeline
-│   ├── predict.py                    # ONNX Runtime inference engine
-│   └── train.py                      # DistilBERT fine-tuning pipeline
-├── tests/
-│   ├── test_api.py                   # Endpoint integration tests
-│   └── test_dataset.py               # Data processing & tokenization tests
-├── docker-compose.yml                # Microservices composition (API + UI)
-├── Makefile                          # Task automation CLI
-├── requirements.txt                  # Lightweight inference dependencies
-└── requirements-dev.txt              # Full training, dev, and testing stack
-🚀 QuickstartPrerequisitesPython 3.10+Docker & Docker Compose (optional, for containerization)1. Local Environment SetupBashgit clone [https://github.com/](https://github.com/)<your-username>/financial-sentiment-transfer-learning.git
+│   │   ├── main.py           # FastAPI entrypoint & lifecycle hooks
+│   │   ├── route.py          # API route definitions (/health, /predict)
+│   │   ├── schemas.py        # Pydantic request/response validation
+│   │   └── service.py        # Predictor singleton service wrapper
+│   ├── app_ui.py             # Streamlit visual dashboard
+│   ├── config.py             # Centralized paths and hyperparameters
+│   ├── dataset_loader.py     # Dataset preprocessing & tokenization
+│   ├── predict.py            # Inference engine & sentence tokenizer
+│   └── train.py              # Transfer learning fine-tuning script
+├── tests/                    # Pytest unit and integration test suite
+├── docker-compose.yml        # Multi-container orchestration (API + UI)
+├── Makefile                  # Automated build & dev lifecycle commands
+├── requirements.txt          # Production runtime dependencies
+└── requirements-dev.txt      # Training, testing, and dev tools
+
+```
+
+---
+
+## 🚀 How to Run Locally
+
+### 1. Host Machine Setup
+
+Clone the repository and install development dependencies in a virtual environment:
+
+```bash
+git clone [https://github.com/](https://github.com/)<your-username>/financial-sentiment-transfer-learning.git
 cd financial-sentiment-transfer-learning
 
-# Create virtual environment
 python3 -m venv .venv
 source .venv/bin/activate
-
-# Install dev & training dependencies
 make install-dev
-2. Model Pipeline (Train & Quantize)Bash# 1. Fine-tune DistilBERT on host machine
+
+```
+
+### 2. Train the Model
+
+Run transfer learning to fine-tune the classifier and output model weights to `artifacts/final_model/`:
+
+```bash
 make train
 
-# 2. Export & Quantize to INT8 ONNX format
-python src/export_onnx.py
-3. Run Verification TestsBashmake test
-4. Run Locally on HostBash# Terminal 1: Start FastAPI backend (Port 8000)
+```
+
+### 3. Run Test Suite
+
+Execute unit tests, mock validations, and coverage reporting:
+
+```bash
+make test
+
+```
+
+### 4. Run Locally on Host
+
+To start the services natively on your machine:
+
+```bash
+# Terminal 1: Start FastAPI Backend (Port 8000)
 make serve
 
-# Terminal 2: Start Streamlit UI (Port 8501)
+# Terminal 2: Start Streamlit Frontend (Port 8501)
 make ui
-🐳 Docker Container DeploymentDeploy the entire decoupled stack locally or on a cloud virtual server using Docker Compose:Bash# Build and run containers in detached mode
+
+```
+
+---
+
+## 🐳 Docker Deployment
+
+The fastest way to run the entire production-grade stack is using Docker Compose:
+
+```bash
+# Build and start both API and UI containers
 make docker-up
 
-# View real-time service logs
+# Stream real-time logs from both containers
 make docker-logs
 
-# Stop services
+# Stop all running services
 make docker-down
-Interactive API Swagger Docs: http://localhost:8000/docsStreamlit Web Application: http://localhost:8501📡 API ReferenceHealth CheckHTTPGET /health
-Response:JSON{
+
+```
+
+* **Interactive API Documentation:** [http://localhost:8000/docs](http://localhost:8000/docs)
+* **Streamlit Analytics Dashboard:** [http://localhost:8501](http://localhost:8501)
+
+---
+
+## 📡 API Reference
+
+### Health Status
+
+```http
+GET /health
+
+```
+
+```json
+{
   "status": "healthy",
   "model_loaded": true
 }
-Classify HeadlineHTTPPOST /predict
+
+```
+
+### Single Sentence Prediction
+
+```http
+POST /predict
 Content-Type: application/json
 
 {
   "sentence": "Operating profit rose 14% to EUR 5.1M in the second quarter."
 }
-Response:JSON{
+
+```
+
+```json
+{
   "sentence": "Operating profit rose 14% to EUR 5.1M in the second quarter.",
   "sentiment": "positive",
   "confidence": 0.9842,
@@ -98,42 +194,27 @@ Response:JSON{
     "positive": 0.9842
   }
 }
-Analyze Document / Financial ReportHTTPPOST /predict-document
+
+```
+
+### Document Sentiment Breakdown
+
+```http
+POST /predict-document
 Content-Type: application/json
 
 {
-  "text": "Operating profit rose by 14% to EUR 5.1M. However, overseas supply chain issues created headwinds in Q2."
+  "text": "Operating profit rose 14%. However, sales dipped 2% in overseas markets."
 }
-Response:JSON{
-  "overall_sentiment": "neutral",
-  "overall_confidence": 0.5421,
-  "document_probabilities": {
-    "negative": 0.3812,
-    "neutral": 0.5421,
-    "positive": 0.0767
-  },
-  "sentence_count": 2,
-  "sentence_breakdown": [
-    {
-      "sentence": "Operating profit rose by 14% to EUR 5.1M.",
-      "sentiment": "positive",
-      "confidence": 0.9842,
-      "probabilities": { ... }
-    },
-    {
-      "sentence": "However, overseas supply chain issues created headwinds in Q2.",
-      "sentiment": "negative",
-      "confidence": 0.9410,
-      "probabilities": { ... }
-    }
-  ]
-}
-🌐 Cloud Deployment NotesBackend (Render / Koyeb / AWS EC2):Set the start command to:Bashuvicorn src.api.main:app --host 0.0.0.0 --port $PORT
-Frontend (Streamlit Community Cloud):Connect your GitHub repository and point to src/app_ui.py. In App Settings $\to$ Secrets / Environment Variables, add:Ini, TOMLAPI_URL = "[https://your-api-service.onrender.com](https://your-api-service.onrender.com)"
 
+```
 
-## 🔒 License & Copyright
+---
 
-Copyright (c) 2026 Deepanshu Singh. All rights reserved.
+## 📄 License
 
-This project is proprietary and intended for personal/internal use only. No part of this repository may be reproduced, distributed, modified, or used for commercial purposes without prior written permission.
+This project is open-source and distributed under the [MIT License](https://www.google.com/search?q=LICENSE).
+
+```
+
+```

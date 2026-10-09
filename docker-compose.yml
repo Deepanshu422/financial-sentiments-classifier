@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.serve
+    image: financial-sentiment-transfer-learning-api:latest
+    container_name: sentiment_api
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  ui:
+    image: financial-sentiment-transfer-learning-api:latest
+    container_name: sentiment_ui
+    command: streamlit run src/app_ui.py --server.port 8501 --server.address 0.0.0.0
+    environment:
+      - API_URL=http://sentiment_api:8000
+    ports:
+      - "8501:8501"
+    depends_on:
+      - api

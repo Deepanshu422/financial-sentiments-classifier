@@ -1,0 +1,12 @@
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-v --cov=src"
+testpaths = ["tests"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
+
+[tool.isort]
+profile = "black"
+line-length = 100

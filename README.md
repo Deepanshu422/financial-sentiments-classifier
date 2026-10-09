@@ -10,6 +10,8 @@ An end-to-end NLP transfer learning service designed to classify financial headl
 
 The platform fine-tunes a `distilbert-base-uncased` transformer on the Financial PhraseBank dataset, serving predictions via a decoupled **FastAPI** inference backend and an interactive **Streamlit** dashboard.
 
+**🔗 [Access the Live Web Dashboard Here](https://financial-sentiments-classifier-xtvnii4xl5tjjne7t6ktxf.streamlit.app/)**
+
 ![Single Headline Analysis](assets/images/single-headline-analysis.png)
 *Caption: Real-time financial headline sentiment classification with calibrated probability distribution.*
 

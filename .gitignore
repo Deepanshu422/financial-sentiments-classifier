@@ -33,11 +33,22 @@ env/
 
 # Artifacts & Checkpoints
 artifacts/checkpoints/
-artifacts/final_model/
 artifacts/logs/
 artifacts/*.json
 !artifacts/.gitkeep
+
+# Ignore root final_model safetensors & unquantized onnx
+artifacts/final_model/*
+!artifacts/final_model/onnx/
+
+# Explicitly ignore the 260MB unquantized model
+artifacts/final_model/onnx/model.onnx
+artifacts/final_model/onnx/ort_config.json
+
+# Whitelist quantized model and tokenizer configs
 !artifacts/final_model/onnx/model_quantized.onnx
+!artifacts/final_model/onnx/*.json
+!artifacts/final_model/onnx/vocab.txt
 
 # Environment variables & secrets
 .env

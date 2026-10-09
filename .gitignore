@@ -37,6 +37,7 @@ artifacts/final_model/
 artifacts/logs/
 artifacts/*.json
 !artifacts/.gitkeep
+!artifacts/final_model/onnx/model_quantized.onnx
 
 # Environment variables & secrets
 .env

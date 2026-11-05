@@ -48,7 +48,7 @@ def build_model():
         logger.info("Freezing DistilBERT backbone parameters (feature extraction mode)...")
 
         # setting param.requires_grad = False, To turnoff gradient calculations for model's base layers
-        for param in model.distilbert.parameter():
+        for param in model.distilbert.parameters():
             param.requires_grad = False
 
         # verify tainable parameters 

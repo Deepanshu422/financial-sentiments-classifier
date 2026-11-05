@@ -26,7 +26,7 @@ LABEL2ID = {"negative": 0, "neutral": 1, "positive": 2}
 NUM_LABELS = len(ID2LABEL)
 
 
-FREEZE_BACKBONE = False
+FREEZE_BACKBONE = True
 
 
 # Training Hyperparameters
